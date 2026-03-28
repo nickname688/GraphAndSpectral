@@ -1,4 +1,4 @@
-package org.example.project.ui.toolUI
+package org.graph.spectral.toolUI
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

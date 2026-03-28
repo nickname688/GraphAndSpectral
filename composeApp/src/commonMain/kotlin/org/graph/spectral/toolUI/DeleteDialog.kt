@@ -1,4 +1,4 @@
-package org.example.project.ui.toolUI
+package org.graph.spectral.toolUI
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button

@@ -15,8 +15,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -49,14 +52,20 @@ fun HomeScreen(paddingValues: PaddingValues) {
     var matrixResult by remember { mutableStateOf("") }
     var selectedGraph by remember { mutableStateOf("选择预设图") }
     var autoCompute by remember { mutableStateOf(false) }
+    var showGraphVisualizer by remember { mutableStateOf(false) }
 
     val graphGenerator = GraphGenerator()
     val eigenCalculator = EigenCalculator()
 
-    Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .weight(1f)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -333,28 +342,69 @@ fun HomeScreen(paddingValues: PaddingValues) {
                 }
             }
 
-            item {
-                // 图可视化
+            if (!showGraphVisualizer) {
+                item {
+                    // 图可视化按钮
+                    Button(
+                        onClick = { showGraphVisualizer = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("显示图可视化")
+                    }
+                }
+            }
+        }
+
+        // 图可视化窗口
+        if (showGraphVisualizer) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                HorizontalDivider(
+                    thickness = DividerDefaults.Thickness,
+                    color = DividerDefaults.color
+                )
+
                 Card(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        Text(
-                            text = "图可视化",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        // 标题栏
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "图可视化",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Button(
+                                onClick = { showGraphVisualizer = false }
+                            ) {
+                                Text("关闭")
+                            }
+                        }
+
+                        // 图可视化
                         GraphVisualizer(
                             graph = graph,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
+                                .fillMaxSize()
+                                .padding(16.dp)
                         )
                     }
                 }
             }
         }
     }
+
 }

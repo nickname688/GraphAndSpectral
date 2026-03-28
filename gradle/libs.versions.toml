@@ -13,10 +13,12 @@ composeMultiplatform = "1.10.0"
 junit = "4.13.2"
 kotlin = "2.3.0"
 kotlinGraphs = "0.6.1"
+kotlinMath = "1.0.0"
 material3 = "1.10.0-alpha05"
 
 [libraries]
 kotlin-graphs = { module = "io.github.alexandrepiveteau:kotlin-graphs", version.ref = "kotlinGraphs" }
+kotlin-math = { module = "dev.romainguy:kotlin-math", version.ref = "kotlinMath" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }

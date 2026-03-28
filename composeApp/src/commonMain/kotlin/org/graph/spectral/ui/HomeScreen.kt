@@ -1,5 +1,6 @@
 package org.graph.spectral.ui
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,12 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -38,6 +41,43 @@ import org.graph.spectral.computeResult
 import org.graph.spectral.models.EigenCalculator
 import org.graph.spectral.models.Graph
 import org.graph.spectral.models.GraphGenerator
+
+@Composable
+fun CustomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    modifier: Modifier = Modifier
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .height(40.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = MaterialTheme.shapes.small
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        singleLine = true,
+        keyboardOptions = keyboardOptions,
+        decorationBox = { innerTextField ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    )
+                }
+                innerTextField()
+            }
+        }
+    )
+}
 
 @Composable
 fun HomeScreen(paddingValues: PaddingValues) {
@@ -84,12 +124,16 @@ fun HomeScreen(paddingValues: PaddingValues) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = "指令:", style = MaterialTheme.typography.bodyLarge)
-                            OutlinedTextField(
+                            Text(
+                                text = "指令:",
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.width(55.dp)
+                            )
+                            CustomTextField(
                                 value = command,
                                 onValueChange = { command = it },
-                                modifier = Modifier.weight(1f),
-                                placeholder = { Text("例如: 1-2 2-3") }
+                                placeholder = "例如: 1-2 2-3",
+                                modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
                                 val resultGraph = graphGenerator.getGraphByCommand(graph, command)
@@ -113,20 +157,24 @@ fun HomeScreen(paddingValues: PaddingValues) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = "增加边:", style = MaterialTheme.typography.bodyLarge)
-                            OutlinedTextField(
+                            Text(
+                                text = "增加边:",
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.width(55.dp)
+                            )
+                            CustomTextField(
                                 value = node1,
                                 onValueChange = { node1 = it },
-                                modifier = Modifier.weight(1f),
+                                placeholder = "节点1",
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                placeholder = { Text("节点1") }
+                                modifier = Modifier.weight(1f)
                             )
-                            OutlinedTextField(
+                            CustomTextField(
                                 value = node2,
                                 onValueChange = { node2 = it },
-                                modifier = Modifier.weight(1f),
+                                placeholder = "节点2",
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                placeholder = { Text("节点2") }
+                                modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
                                 if (node1.isNotEmpty() && node2.isNotEmpty() && node1 != node2) {
@@ -151,20 +199,23 @@ fun HomeScreen(paddingValues: PaddingValues) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = "删除边:", style = MaterialTheme.typography.bodyLarge)
-                            OutlinedTextField(
+                            Text(
+                                text = "删除边:", style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.width(55.dp)
+                            )
+                            CustomTextField(
                                 value = delNode1,
                                 onValueChange = { delNode1 = it },
-                                modifier = Modifier.weight(1f),
+                                placeholder = "节点1",
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                placeholder = { Text("节点1") }
+                                modifier = Modifier.weight(1f)
                             )
-                            OutlinedTextField(
+                            CustomTextField(
                                 value = delNode2,
                                 onValueChange = { delNode2 = it },
-                                modifier = Modifier.weight(1f),
+                                placeholder = "节点2",
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                placeholder = { Text("节点2") }
+                                modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
                                 if (delNode1.isNotEmpty() && delNode2.isNotEmpty()) {
@@ -189,13 +240,16 @@ fun HomeScreen(paddingValues: PaddingValues) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = "删除点:", style = MaterialTheme.typography.bodyLarge)
-                            OutlinedTextField(
+                            Text(
+                                text = "删除点:", style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.width(55.dp)
+                            )
+                            CustomTextField(
                                 value = delNode,
                                 onValueChange = { delNode = it },
-                                modifier = Modifier.weight(1f),
+                                placeholder = "节点",
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                placeholder = { Text("节点") }
+                                modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
                                 if (delNode.isNotEmpty()) {
@@ -302,15 +356,11 @@ fun HomeScreen(paddingValues: PaddingValues) {
                 }
             }
 
-            item {
-                // 右侧结果显示
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
+            if (result.isNotEmpty()) {
+                item {
                     // 计算结果
                     Card(
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
@@ -324,9 +374,14 @@ fun HomeScreen(paddingValues: PaddingValues) {
                         }
                     }
 
+                }
+            }
+
+            if (matrixResult.isNotEmpty()) {
+                item {
                     // 邻接矩阵
                     Card(
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
@@ -406,5 +461,4 @@ fun HomeScreen(paddingValues: PaddingValues) {
             }
         }
     }
-
 }

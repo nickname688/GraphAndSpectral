@@ -40,6 +40,11 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlin.graphs)
+
+            // Material Icons（基础）
+            implementation(libs.material.icons.core)
+            // Material Icons（扩展，几千个）
+            implementation(libs.material.icons.extended)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

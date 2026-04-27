@@ -35,13 +35,13 @@ import androidx.compose.ui.unit.dp
 import org.graph.spectral.components.GraphVisualizer
 import org.graph.spectral.computeResult
 import org.graph.spectral.models.EigenCalculator
-import org.graph.spectral.models.Graph
 import org.graph.spectral.models.GraphGenerator
+import org.graph.spectral.models.graphcore.GraphCore
 import org.graph.spectral.toolUI.CustomTextField
 
 @Composable
 fun HomeScreen(paddingValues: PaddingValues) {
-    var graph by remember { mutableStateOf(Graph()) }
+    var graph by remember { mutableStateOf(GraphCore()) }
     var node1 by remember { mutableStateOf("") }
     var node2 by remember { mutableStateOf("") }
     var delNode1 by remember { mutableStateOf("") }
@@ -56,6 +56,31 @@ fun HomeScreen(paddingValues: PaddingValues) {
 
     val graphGenerator = GraphGenerator()
     val eigenCalculator = EigenCalculator()
+
+    fun showError(message: String) {
+        result = "错误：$message"
+        matrixResult = ""
+    }
+
+    fun updateGraph(nextGraph: GraphCore) {
+        graph = nextGraph
+        if (autoCompute) {
+            computeResult(nextGraph, eigenCalculator) { r, m ->
+                result = r
+                matrixResult = m
+            }
+        } else {
+            result = ""
+            matrixResult = ""
+        }
+    }
+
+    fun runCompute() {
+        computeResult(graph, eigenCalculator) { r, m ->
+            result = r
+            matrixResult = m
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -96,15 +121,12 @@ fun HomeScreen(paddingValues: PaddingValues) {
                                 modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
-                                val resultGraph = graphGenerator.getGraphByCommand(graph, command)
+                                val resultGraph = graphGenerator.getGraphByCommand(graph, command.trim())
                                 if (resultGraph != null) {
-                                    graph = resultGraph
-                                    if (autoCompute) {
-                                        computeResult(graph, eigenCalculator) { r, m ->
-                                            result = r
-                                            matrixResult = m
-                                        }
-                                    }
+                                    selectedGraph = "自定义"
+                                    updateGraph(resultGraph)
+                                } else {
+                                    showError("输入有误")
                                 }
                             }) {
                                 Text("确定")
@@ -137,15 +159,17 @@ fun HomeScreen(paddingValues: PaddingValues) {
                                 modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
-                                if (node1.isNotEmpty() && node2.isNotEmpty() && node1 != node2) {
-                                    graph.addEdge(node1, node2)
-                                    node1 = ""
-                                    node2 = ""
-                                    if (autoCompute) {
-                                        computeResult(graph, eigenCalculator) { r, m ->
-                                            result = r
-                                            matrixResult = m
-                                        }
+                                val first = node1.trim()
+                                val second = node2.trim()
+                                when {
+                                    first.isEmpty() || second.isEmpty() -> showError("未输入参数")
+                                    first == second -> showError("不允许加入自环")
+                                    else -> {
+                                        val nextGraph = graph.copy().also { it.addEdge(first, second) }
+                                        node1 = ""
+                                        node2 = ""
+                                        selectedGraph = "自定义"
+                                        updateGraph(nextGraph)
                                     }
                                 }
                             }) {
@@ -178,15 +202,17 @@ fun HomeScreen(paddingValues: PaddingValues) {
                                 modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
-                                if (delNode1.isNotEmpty() && delNode2.isNotEmpty()) {
-                                    graph.removeEdge(delNode1, delNode2)
-                                    delNode1 = ""
-                                    delNode2 = ""
-                                    if (autoCompute) {
-                                        computeResult(graph, eigenCalculator) { r, m ->
-                                            result = r
-                                            matrixResult = m
-                                        }
+                                val first = delNode1.trim()
+                                val second = delNode2.trim()
+                                when {
+                                    first.isEmpty() || second.isEmpty() -> showError("未输入参数")
+                                    !graph.containsEdge(first, second) -> showError("不存在边")
+                                    else -> {
+                                        val nextGraph = graph.copy().also { it.removeEdge(first, second) }
+                                        delNode1 = ""
+                                        delNode2 = ""
+                                        selectedGraph = "自定义"
+                                        updateGraph(nextGraph)
                                     }
                                 }
                             }) {
@@ -212,14 +238,15 @@ fun HomeScreen(paddingValues: PaddingValues) {
                                 modifier = Modifier.weight(1f)
                             )
                             Button(onClick = {
-                                if (delNode.isNotEmpty()) {
-                                    graph.removeNode(delNode)
-                                    delNode = ""
-                                    if (autoCompute) {
-                                        computeResult(graph, eigenCalculator) { r, m ->
-                                            result = r
-                                            matrixResult = m
-                                        }
+                                val node = delNode.trim()
+                                when {
+                                    node.isEmpty() -> showError("未输入参数")
+                                    !graph.containsNode(node) -> showError("不存在点")
+                                    else -> {
+                                        val nextGraph = graph.copy().also { it.removeNode(node) }
+                                        delNode = ""
+                                        selectedGraph = "自定义"
+                                        updateGraph(nextGraph)
                                     }
                                 }
                             }) {
@@ -243,10 +270,7 @@ fun HomeScreen(paddingValues: PaddingValues) {
                                 Text(text = "自动计算")
                             }
                             Button(onClick = {
-                                computeResult(graph, eigenCalculator) { r, m ->
-                                    result = r
-                                    matrixResult = m
-                                }
+                                runCompute()
                             }) {
                                 Text("开始计算")
                             }
@@ -288,16 +312,7 @@ fun HomeScreen(paddingValues: PaddingValues) {
                                                 selectedGraph = option
                                                 expanded = false
                                                 if (option != "选择预设图" && option != "自定义") {
-                                                    graph = graphGenerator.getGraph(option)
-                                                    if (autoCompute) {
-                                                        computeResult(
-                                                            graph,
-                                                            eigenCalculator
-                                                        ) { r, m ->
-                                                            result = r
-                                                            matrixResult = m
-                                                        }
-                                                    }
+                                                    updateGraph(graphGenerator.getGraph(option))
                                                 }
                                             }
                                         )
@@ -305,7 +320,8 @@ fun HomeScreen(paddingValues: PaddingValues) {
                                 }
                             }
                             Button(onClick = {
-                                graph.clear()
+                                graph = GraphCore()
+                                selectedGraph = "选择预设图"
                                 result = ""
                                 matrixResult = ""
                             }) {

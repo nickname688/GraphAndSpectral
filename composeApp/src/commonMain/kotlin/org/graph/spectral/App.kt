@@ -12,7 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import org.graph.spectral.models.EigenCalculator
-import org.graph.spectral.models.Graph
+import org.graph.spectral.models.graphcore.GraphCore
+import org.graph.spectral.models.graphcore.adjacencyMatrix
 import org.graph.spectral.ui.HomeScreen
 import org.graph.spectral.ui.SettingsScreen
 
@@ -58,7 +59,7 @@ fun App() {
     }
 }
 
-fun computeResult(graph: Graph, calculator: EigenCalculator, callback: (String, String) -> Unit) {
+fun computeResult(graph: GraphCore, calculator: EigenCalculator, callback: (String, String) -> Unit) {
     val result = calculator.calculate(graph)
     if (result != null) {
         val resultText = calculator.formatResult(result)

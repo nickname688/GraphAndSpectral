@@ -9,19 +9,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.graph.spectral.models.Graph
+import org.graph.spectral.models.graphcore.GraphCore
+import org.graph.spectral.models.graphcore.GraphEdge
 import kotlin.math.*
 
 @Composable
 fun GraphVisualizer(
-    graph: Graph,
+    graph: GraphCore,
     modifier: Modifier = Modifier
         .width(300.dp)
         .height(200.dp)
 ) {
-    val nodes = graph.nodes().toList()
+    val nodes = graph.nodesSorted()
     val edges = graph.edges().toList()
     
     val nodePositions by remember(graph) {
@@ -36,7 +36,7 @@ fun GraphVisualizer(
     }
 }
 
-private fun layoutNodes(nodes: List<String>, edges: List<Pair<String, String>>): Map<String, Offset> {
+private fun layoutNodes(nodes: List<String>, edges: List<GraphEdge>): Map<String, Offset> {
     val positions = mutableMapOf<String, Offset>()
     val width = 300f
     val height = 200f
@@ -84,7 +84,9 @@ private fun layoutNodes(nodes: List<String>, edges: List<Pair<String, String>>):
         }
 
         // 计算吸引力
-        edges.forEach { (node1, node2) ->
+        edges.forEach { edge ->
+            val node1 = edge.first
+            val node2 = edge.second
             val pos1 = positions[node1]!!
             val pos2 = positions[node2]!!
             val delta = pos2 - pos1
@@ -111,12 +113,12 @@ private fun layoutNodes(nodes: List<String>, edges: List<Pair<String, String>>):
 }
 
 private fun DrawScope.drawEdges(
-    edges: List<Pair<String, String>>,
+    edges: List<GraphEdge>,
     nodePositions: Map<String, Offset>
 ) {
-    edges.forEach { (node1, node2) ->
-        val pos1 = nodePositions[node1]
-        val pos2 = nodePositions[node2]
+    edges.forEach { edge ->
+        val pos1 = nodePositions[edge.first]
+        val pos2 = nodePositions[edge.second]
         if (pos1 != null && pos2 != null) {
             drawLine(
                 color = Color.Black,

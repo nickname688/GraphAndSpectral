@@ -2,80 +2,135 @@ package org.graph.spectral.models
 
 import kotlin.math.abs
 import kotlin.math.pow
+import kotlin.math.sqrt
+import org.graph.spectral.models.graphcore.AdjacencyMatrix
+import org.graph.spectral.models.graphcore.GraphCore
+import org.graph.spectral.models.graphcore.GraphEdge
+import org.graph.spectral.models.graphcore.GraphNodeOrdering
+import org.graph.spectral.models.graphcore.adjacencyMatrix
 
 class EigenCalculator {
     data class EigenResult(
         val maxEigenvalue: Double,
-        val eigenvector: List<Double>,
-        val nodes: List<String>
+        val edgeCount: Int,
+        val eigenvector: List<Double>?,
+        val nodes: List<String>,
+        val edges: List<GraphEdge>
     )
 
-    fun calculate(graph: Graph): EigenResult? {
+    fun calculate(graph: GraphCore): EigenResult? {
+        if (graph.order() == 0) return null
+
         val matrix = graph.adjacencyMatrix()
-        val size = matrix.size
-        if (size == 0) return null
+        val (maxEigenvalue, eigenvector) = powerMethod(matrix.values)
 
-        // 使用幂法计算最大特征值和对应的特征向量
-        val (maxEigenvalue, eigenvector) = powerMethod(matrix)
-        val nodes = graph.nodes().toList().sorted()
-
-        return EigenResult(maxEigenvalue, eigenvector, nodes)
+        return EigenResult(
+            maxEigenvalue = maxEigenvalue,
+            edgeCount = graph.size(),
+            eigenvector = eigenvector,
+            nodes = matrix.nodes,
+            edges = graph.edges().sortedWith(edgeComparator)
+        )
     }
 
-    private fun powerMethod(matrix: Array<DoubleArray>, maxIterations: Int = 1000, tolerance: Double = 1e-10): Pair<Double, List<Double>> {
+    private val edgeComparator = Comparator<GraphEdge> { left, right ->
+        val firstCompare = GraphNodeOrdering.compare(left.first, right.first)
+        if (firstCompare != 0) {
+            firstCompare
+        } else {
+            GraphNodeOrdering.compare(left.second, right.second)
+        }
+    }
+
+    private fun powerMethod(
+        matrix: Array<DoubleArray>,
+        maxIterations: Int = 1000,
+        tolerance: Double = 1e-10
+    ): Pair<Double, List<Double>?> {
         val n = matrix.size
-        var x = DoubleArray(n) { 1.0 / n }
-        var lambda = 0.0
+        if (n == 0) return 0.0 to null
 
-        for (iter in 0 until maxIterations) {
-            val y = DoubleArray(n) { i ->
-                var sum = 0.0
-                for (j in 0 until n) {
-                    sum += matrix[i][j] * x[j]
-                }
-                sum
+        var vector = DoubleArray(n) { 1.0 / sqrt(n.toDouble()) }
+        var lambda = rayleighQuotient(matrix, vector)
+
+        for (iteration in 0 until maxIterations) {
+            val product = multiply(matrix, vector)
+            val norm = product.norm()
+            if (norm <= tolerance) {
+                return 0.0 to null
             }
 
-            // 计算新的特征值（使用向量的和）
-            val newLambda = y.sum()
-            // 归一化特征向量
-            x = y.map { it / newLambda }.toDoubleArray()
-
-            if (abs(newLambda - lambda) < tolerance) {
-                lambda = newLambda
-                break
+            val nextVector = product.map { it / norm }.toDoubleArray()
+            val nextLambda = rayleighQuotient(matrix, nextVector)
+            if (abs(nextLambda - lambda) < tolerance) {
+                return nextLambda to normalizeSign(nextVector).toList()
             }
-            lambda = newLambda
+
+            vector = nextVector
+            lambda = nextLambda
         }
 
-        // 确保特征向量的第一个元素为正（Perron-Frobenius向量）
-        if (x[0] < 0) {
-            x = x.map { -it }.toDoubleArray()
-        }
+        return lambda to normalizeSign(vector).toList()
+    }
 
-        return lambda to x.toList()
+    private fun multiply(matrix: Array<DoubleArray>, vector: DoubleArray): DoubleArray {
+        return DoubleArray(matrix.size) { row ->
+            var sum = 0.0
+            for (col in vector.indices) {
+                sum += matrix[row][col] * vector[col]
+            }
+            sum
+        }
+    }
+
+    private fun rayleighQuotient(matrix: Array<DoubleArray>, vector: DoubleArray): Double {
+        val product = multiply(matrix, vector)
+        var numerator = 0.0
+        var denominator = 0.0
+        for (i in vector.indices) {
+            numerator += vector[i] * product[i]
+            denominator += vector[i] * vector[i]
+        }
+        return if (denominator == 0.0) 0.0 else numerator / denominator
+    }
+
+    private fun DoubleArray.norm(): Double {
+        return sqrt(sumOf { it * it })
+    }
+
+    private fun normalizeSign(vector: DoubleArray): DoubleArray {
+        val firstNonZero = vector.firstOrNull { abs(it) > 1e-12 } ?: return vector
+        return if (firstNonZero < 0) vector.map { -it }.toDoubleArray() else vector
     }
 
     fun formatResult(result: EigenResult): String {
-        val sb = StringBuilder()
-        sb.append("顶点数: ${result.nodes.size}")
-        sb.append("\n特征值: ${result.maxEigenvalue.round(4)}") // 保留4位小数
-        sb.append("\n顶点集: ${result.nodes.joinToString(", ")}")
-        sb.append("\nPF向量: ${result.eigenvector.joinToString(", ") { it.round(3) }}") // 保留3位
-        return sb.toString()
+        val eigenvectorText = result.eigenvector
+            ?.joinToString(", ") { it.round(3) }
+            ?: "未定义（零矩阵）"
+
+        return buildString {
+            append("顶点数: ${result.nodes.size}")
+            append("\n边数: ${result.edgeCount}")
+            append("\n特征值: ${result.maxEigenvalue.round(4)}")
+            append("\n顶点集: ${result.nodes.joinToString(", ")}")
+            append("\n边集: ${formatEdges(result.edges)}")
+            append("\nPF向量: $eigenvectorText")
+        }
     }
 
-    // 跨平台通用：保留 N 位小数
+    fun formatAdjacencyMatrix(matrix: AdjacencyMatrix): String {
+        return matrix.asIntRows().joinToString("\n") { row ->
+            row.joinToString(" ")
+        }
+    }
+
     private fun Double.round(decimals: Int): String {
         val multiplier = 10.0.pow(decimals)
         return (kotlin.math.round(this * multiplier) / multiplier).toString()
     }
-    fun formatAdjacencyMatrix(matrix: Array<DoubleArray>): String {
-        val sb = StringBuilder()
-        for (row in matrix) {
-            sb.append(row.joinToString(" ") { if (it == 1.0) "1" else "0" })
-            sb.append("\n")
-        }
-        return sb.toString()
+
+    private fun formatEdges(edges: List<GraphEdge>): String {
+        if (edges.isEmpty()) return "空"
+        return edges.joinToString(", ") { "(${it.first}, ${it.second})" }
     }
 }

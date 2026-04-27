@@ -1,6 +1,13 @@
 package org.graph.spectral.models.graphcore
 
+/**
+ * KMP 侧自研的无向简单图核心。
+ *
+ * 设计目标是服务谱图算法迁移：保留孤立点、不允许自环、不允许重边，并且完全放在
+ * commonMain 可用的 Kotlin 标准集合之上。
+ */
 class GraphCore {
+    // 邻接表：每个节点都必须在 map 中占一个 key，即使它当前没有任何边。
     private val adjacency: MutableMap<String, MutableSet<String>> = mutableMapOf()
 
     constructor()
@@ -43,6 +50,12 @@ class GraphCore {
 
     fun addEdge(edge: GraphEdge): Boolean = addEdge(edge.first, edge.second)
 
+    /**
+     * 只删除边，不自动删除孤立点。
+     *
+     * Python NetworkX 的固定阶数求解器依赖“点还在、边没了”的状态，所以清理孤立点必须
+     * 通过 removeIsolatedNodes() 显式完成。
+     */
     fun removeEdge(nodeA: String, nodeB: String): Boolean {
         val changedA = adjacency[nodeA]?.remove(nodeB) ?: false
         val changedB = adjacency[nodeB]?.remove(nodeA) ?: false

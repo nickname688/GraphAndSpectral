@@ -16,10 +16,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -332,6 +330,46 @@ fun HomeScreen(paddingValues: PaddingValues) {
                 }
             }
 
+            item {
+                if (showGraphVisualizer) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "图可视化",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Button(onClick = { showGraphVisualizer = false }) {
+                                    Text("关闭")
+                                }
+                            }
+                            GraphVisualizer(
+                                graph = graph,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(320.dp)
+                            )
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = { showGraphVisualizer = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("显示图可视化")
+                    }
+                }
+            }
+
             if (result.isNotEmpty()) {
                 item {
                     // 计算结果
@@ -369,69 +407,6 @@ fun HomeScreen(paddingValues: PaddingValues) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(matrixResult)
                         }
-                    }
-                }
-            }
-
-            if (!showGraphVisualizer) {
-                item {
-                    // 图可视化按钮
-                    Button(
-                        onClick = { showGraphVisualizer = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("显示图可视化")
-                    }
-                }
-            }
-        }
-
-        // 图可视化窗口
-        if (showGraphVisualizer) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-            ) {
-                HorizontalDivider(
-                    thickness = DividerDefaults.Thickness,
-                    color = DividerDefaults.color
-                )
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        // 标题栏
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "图可视化",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Button(
-                                onClick = { showGraphVisualizer = false }
-                            ) {
-                                Text("关闭")
-                            }
-                        }
-
-                        // 图可视化
-                        GraphVisualizer(
-                            graph = graph,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-                        )
                     }
                 }
             }

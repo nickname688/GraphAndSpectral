@@ -49,7 +49,8 @@ fun HomeScreen(paddingValues: PaddingValues) {
     var result by remember { mutableStateOf("") }
     var matrixResult by remember { mutableStateOf("") }
     var selectedGraph by remember { mutableStateOf("选择预设图") }
-    var autoCompute by remember { mutableStateOf(false) }
+    var autoCompute by remember { mutableStateOf(true) }
+    var showMoreOperations by remember { mutableStateOf(false) }
     var showGraphVisualizer by remember { mutableStateOf(false) }
 
     val graphGenerator = GraphGenerator()
@@ -131,124 +132,137 @@ fun HomeScreen(paddingValues: PaddingValues) {
                             }
                         }
 
-                        // 添加边
-                        Row(
+                        OutlinedButton(
+                            onClick = { showMoreOperations = !showMoreOperations },
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = "增加边:",
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.width(55.dp)
-                            )
-                            CustomTextField(
-                                value = node1,
-                                onValueChange = { node1 = it },
-                                placeholder = "节点1",
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                modifier = Modifier.weight(1f)
-                            )
-                            CustomTextField(
-                                value = node2,
-                                onValueChange = { node2 = it },
-                                placeholder = "节点2",
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                modifier = Modifier.weight(1f)
-                            )
-                            Button(onClick = {
-                                val first = node1.trim()
-                                val second = node2.trim()
-                                when {
-                                    first.isEmpty() || second.isEmpty() -> showError("未输入参数")
-                                    first == second -> showError("不允许加入自环")
-                                    else -> {
-                                        val nextGraph = graph.copy().also { it.addEdge(first, second) }
-                                        node1 = ""
-                                        node2 = ""
-                                        selectedGraph = "自定义"
-                                        updateGraph(nextGraph)
-                                    }
-                                }
-                            }) {
-                                Text("确定")
-                            }
+                            Text(if (showMoreOperations) "隐藏更多操作" else "显示更多操作")
                         }
 
-                        // 删除边
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "删除边:", style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.width(55.dp)
-                            )
-                            CustomTextField(
-                                value = delNode1,
-                                onValueChange = { delNode1 = it },
-                                placeholder = "节点1",
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                modifier = Modifier.weight(1f)
-                            )
-                            CustomTextField(
-                                value = delNode2,
-                                onValueChange = { delNode2 = it },
-                                placeholder = "节点2",
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                modifier = Modifier.weight(1f)
-                            )
-                            Button(onClick = {
-                                val first = delNode1.trim()
-                                val second = delNode2.trim()
-                                when {
-                                    first.isEmpty() || second.isEmpty() -> showError("未输入参数")
-                                    !graph.containsEdge(first, second) -> showError("不存在边")
-                                    else -> {
-                                        val nextGraph = graph.copy().also { it.removeEdge(first, second) }
-                                        delNode1 = ""
-                                        delNode2 = ""
-                                        selectedGraph = "自定义"
-                                        updateGraph(nextGraph)
+                        if (showMoreOperations) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                // 添加边
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = "增加边:",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier.width(55.dp)
+                                    )
+                                    CustomTextField(
+                                        value = node1,
+                                        onValueChange = { node1 = it },
+                                        placeholder = "节点1",
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    CustomTextField(
+                                        value = node2,
+                                        onValueChange = { node2 = it },
+                                        placeholder = "节点2",
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Button(onClick = {
+                                        val first = node1.trim()
+                                        val second = node2.trim()
+                                        when {
+                                            first.isEmpty() || second.isEmpty() -> showError("未输入参数")
+                                            first == second -> showError("不允许加入自环")
+                                            else -> {
+                                                val nextGraph = graph.copy().also { it.addEdge(first, second) }
+                                                node1 = ""
+                                                node2 = ""
+                                                selectedGraph = "自定义"
+                                                updateGraph(nextGraph)
+                                            }
+                                        }
+                                    }) {
+                                        Text("确定")
                                     }
                                 }
-                            }) {
-                                Text("确定")
-                            }
-                        }
 
-                        // 删除节点
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "删除点:", style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.width(55.dp)
-                            )
-                            CustomTextField(
-                                value = delNode,
-                                onValueChange = { delNode = it },
-                                placeholder = "节点",
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                modifier = Modifier.weight(1f)
-                            )
-                            Button(onClick = {
-                                val node = delNode.trim()
-                                when {
-                                    node.isEmpty() -> showError("未输入参数")
-                                    !graph.containsNode(node) -> showError("不存在点")
-                                    else -> {
-                                        val nextGraph = graph.copy().also { it.removeNode(node) }
-                                        delNode = ""
-                                        selectedGraph = "自定义"
-                                        updateGraph(nextGraph)
+                                // 删除边
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = "删除边:", style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier.width(55.dp)
+                                    )
+                                    CustomTextField(
+                                        value = delNode1,
+                                        onValueChange = { delNode1 = it },
+                                        placeholder = "节点1",
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    CustomTextField(
+                                        value = delNode2,
+                                        onValueChange = { delNode2 = it },
+                                        placeholder = "节点2",
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Button(onClick = {
+                                        val first = delNode1.trim()
+                                        val second = delNode2.trim()
+                                        when {
+                                            first.isEmpty() || second.isEmpty() -> showError("未输入参数")
+                                            !graph.containsEdge(first, second) -> showError("不存在边")
+                                            else -> {
+                                                val nextGraph = graph.copy().also { it.removeEdge(first, second) }
+                                                delNode1 = ""
+                                                delNode2 = ""
+                                                selectedGraph = "自定义"
+                                                updateGraph(nextGraph)
+                                            }
+                                        }
+                                    }) {
+                                        Text("确定")
                                     }
                                 }
-                            }) {
-                                Text("确定")
+
+                                // 删除节点
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = "删除点:", style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier.width(55.dp)
+                                    )
+                                    CustomTextField(
+                                        value = delNode,
+                                        onValueChange = { delNode = it },
+                                        placeholder = "节点",
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Button(onClick = {
+                                        val node = delNode.trim()
+                                        when {
+                                            node.isEmpty() -> showError("未输入参数")
+                                            !graph.containsNode(node) -> showError("不存在点")
+                                            else -> {
+                                                val nextGraph = graph.copy().also { it.removeNode(node) }
+                                                delNode = ""
+                                                selectedGraph = "自定义"
+                                                updateGraph(nextGraph)
+                                            }
+                                        }
+                                    }) {
+                                        Text("确定")
+                                    }
+                                }
                             }
                         }
 

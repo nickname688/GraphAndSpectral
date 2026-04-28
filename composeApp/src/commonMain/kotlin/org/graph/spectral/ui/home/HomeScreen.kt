@@ -18,23 +18,16 @@ import org.graph.spectral.computeResult
 import org.graph.spectral.models.EigenCalculator
 import org.graph.spectral.models.GraphGenerator
 import org.graph.spectral.models.graphcore.GraphCore
-import org.graph.spectral.models.hypergraph.HypergraphCommandParser
-import org.graph.spectral.models.hypergraph.HypergraphCore
-import org.graph.spectral.models.hypergraph.HypergraphSpectralCalculator
 
 @Composable
 fun HomeScreen(paddingValues: PaddingValues) {
-    var computeMode by remember { mutableStateOf(SpectralComputeMode.Graph) }
     var graph by remember { mutableStateOf(GraphCore()) }
-    var hypergraph by remember { mutableStateOf(HypergraphCore()) }
     var node1 by remember { mutableStateOf("") }
     var node2 by remember { mutableStateOf("") }
     var delNode1 by remember { mutableStateOf("") }
     var delNode2 by remember { mutableStateOf("") }
     var delNode by remember { mutableStateOf("") }
     var command by remember { mutableStateOf("") }
-    var hyperedgeCommand by remember { mutableStateOf("") }
-    var deleteHyperedgeCommand by remember { mutableStateOf("") }
     var result by remember { mutableStateOf("") }
     var matrixResult by remember { mutableStateOf("") }
     var selectedGraph by remember { mutableStateOf("选择预设图") }
@@ -46,8 +39,6 @@ fun HomeScreen(paddingValues: PaddingValues) {
 
     val graphGenerator = GraphGenerator()
     val eigenCalculator = EigenCalculator()
-    val hypergraphParser = HypergraphCommandParser()
-    val hypergraphCalculator = HypergraphSpectralCalculator()
 
     fun showError(message: String) {
         result = "错误：$message"
@@ -67,64 +58,10 @@ fun HomeScreen(paddingValues: PaddingValues) {
         }
     }
 
-    fun updateHypergraph(nextHypergraph: HypergraphCore) {
-        hypergraph = nextHypergraph
-        matrixResult = ""
-        if (autoCompute) {
-            val hypergraphResult = hypergraphCalculator.calculate(nextHypergraph)
-            result = hypergraphCalculator.formatResult(hypergraphResult)
-        } else {
-            result = ""
-        }
-    }
-
     fun runCompute() {
         computeResult(graph, eigenCalculator) { r, m ->
             result = r
             matrixResult = m
-        }
-    }
-
-    fun runHypergraphCompute() {
-        matrixResult = ""
-        val hypergraphResult = hypergraphCalculator.calculate(hypergraph)
-        result = hypergraphCalculator.formatResult(hypergraphResult)
-    }
-
-    fun submitHyperedgeCommand() {
-        runCatching {
-            val parsed = hypergraphParser.parseHyperedges(hyperedgeCommand)
-            val nextHypergraph = hypergraph.copy()
-            parsed.hyperedges.forEach { edge ->
-                nextHypergraph.addHyperedge(edge.nodes)
-            }
-            nextHypergraph
-        }.onSuccess { nextHypergraph ->
-            hyperedgeCommand = ""
-            updateHypergraph(nextHypergraph)
-        }.onFailure { error ->
-            showError(error.message ?: "输入有误")
-        }
-    }
-
-    fun submitDeleteHyperedgeCommand() {
-        runCatching {
-            val parsed = hypergraphParser.parseHyperedges(deleteHyperedgeCommand)
-            val missing = parsed.hyperedges.filterNot { edge ->
-                hypergraph.containsHyperedge(edge.nodes)
-            }
-            require(missing.isEmpty()) { "不存在超边: ${missing.joinToString(", ")}" }
-
-            val nextHypergraph = hypergraph.copy()
-            parsed.hyperedges.forEach { edge ->
-                nextHypergraph.removeHyperedge(edge.nodes)
-            }
-            nextHypergraph
-        }.onSuccess { nextHypergraph ->
-            deleteHyperedgeCommand = ""
-            updateHypergraph(nextHypergraph)
-        }.onFailure { error ->
-            showError(error.message ?: "输入有误")
         }
     }
 
@@ -165,13 +102,6 @@ fun HomeScreen(paddingValues: PaddingValues) {
         }
 
         selectedEditMode = mode
-    }
-
-    fun selectComputeMode(mode: SpectralComputeMode) {
-        if (mode == computeMode) return
-        computeMode = mode
-        result = ""
-        matrixResult = ""
     }
 
     fun submitEditOperation() {
@@ -235,82 +165,52 @@ fun HomeScreen(paddingValues: PaddingValues) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                ComputeModeRow(
-                    selectedMode = computeMode,
-                    onModeSelected = ::selectComputeMode
+                HomeControlPanel(
+                    command = command,
+                    onCommandChange = { command = it },
+                    onSubmitCommand = {
+                        val resultGraph = graphGenerator.getGraphByCommand(graph, command.trim())
+                        if (resultGraph != null) {
+                            selectedGraph = "自定义"
+                            updateGraph(resultGraph)
+                        } else {
+                            showError("输入有误")
+                        }
+                    },
+                    selectedEditMode = selectedEditMode,
+                    node1 = node1,
+                    onNode1Change = { node1 = it },
+                    node2 = node2,
+                    onNode2Change = { node2 = it },
+                    delNode1 = delNode1,
+                    onDelNode1Change = { delNode1 = it },
+                    delNode2 = delNode2,
+                    onDelNode2Change = { delNode2 = it },
+                    delNode = delNode,
+                    onDelNodeChange = { delNode = it },
+                    onOpenEditModeSheet = { showEditModeSheet = true },
+                    onSubmitEditOperation = { submitEditOperation() },
+                    autoCompute = autoCompute,
+                    onAutoComputeChange = { autoCompute = it },
+                    onRunCompute = { runCompute() },
+                    selectedGraph = selectedGraph,
+                    onOpenPresetSheet = { showPresetSheet = true },
+                    onClearGraph = {
+                        graph = GraphCore()
+                        selectedGraph = "选择预设图"
+                        result = ""
+                        matrixResult = ""
+                    }
                 )
             }
 
-            if (computeMode == SpectralComputeMode.Graph) {
-                item {
-                    HomeControlPanel(
-                        command = command,
-                        onCommandChange = { command = it },
-                        onSubmitCommand = {
-                            val resultGraph = graphGenerator.getGraphByCommand(graph, command.trim())
-                            if (resultGraph != null) {
-                                selectedGraph = "自定义"
-                                updateGraph(resultGraph)
-                            } else {
-                                showError("输入有误")
-                            }
-                        },
-                        selectedEditMode = selectedEditMode,
-                        node1 = node1,
-                        onNode1Change = { node1 = it },
-                        node2 = node2,
-                        onNode2Change = { node2 = it },
-                        delNode1 = delNode1,
-                        onDelNode1Change = { delNode1 = it },
-                        delNode2 = delNode2,
-                        onDelNode2Change = { delNode2 = it },
-                        delNode = delNode,
-                        onDelNodeChange = { delNode = it },
-                        onOpenEditModeSheet = { showEditModeSheet = true },
-                        onSubmitEditOperation = { submitEditOperation() },
-                        autoCompute = autoCompute,
-                        onAutoComputeChange = { autoCompute = it },
-                        onRunCompute = { runCompute() },
-                        selectedGraph = selectedGraph,
-                        onOpenPresetSheet = { showPresetSheet = true },
-                        onClearGraph = {
-                            graph = GraphCore()
-                            selectedGraph = "选择预设图"
-                            result = ""
-                            matrixResult = ""
-                        }
-                    )
-                }
-
-                item {
-                    GraphVisualizerSection(
-                        graph = graph,
-                        showGraphVisualizer = showGraphVisualizer,
-                        onShowGraphVisualizer = { showGraphVisualizer = true },
-                        onHideGraphVisualizer = { showGraphVisualizer = false }
-                    )
-                }
-            } else {
-                item {
-                    HypergraphControlPanel(
-                        hyperedgeCommand = hyperedgeCommand,
-                        onHyperedgeCommandChange = { hyperedgeCommand = it },
-                        onAddHyperedges = { submitHyperedgeCommand() },
-                        deleteHyperedgeCommand = deleteHyperedgeCommand,
-                        onDeleteHyperedgeCommandChange = { deleteHyperedgeCommand = it },
-                        onDeleteHyperedges = { submitDeleteHyperedgeCommand() },
-                        autoCompute = autoCompute,
-                        onAutoComputeChange = { autoCompute = it },
-                        onRunCompute = { runHypergraphCompute() },
-                        onClearHypergraph = {
-                            hypergraph = HypergraphCore()
-                            hyperedgeCommand = ""
-                            deleteHyperedgeCommand = ""
-                            result = ""
-                            matrixResult = ""
-                        }
-                    )
-                }
+            item {
+                GraphVisualizerSection(
+                    graph = graph,
+                    showGraphVisualizer = showGraphVisualizer,
+                    onShowGraphVisualizer = { showGraphVisualizer = true },
+                    onHideGraphVisualizer = { showGraphVisualizer = false }
+                )
             }
 
             if (result.isNotEmpty()) {
@@ -326,7 +226,7 @@ fun HomeScreen(paddingValues: PaddingValues) {
             }
         }
 
-        if (showPresetSheet && computeMode == SpectralComputeMode.Graph) {
+        if (showPresetSheet) {
             PresetGraphBottomSheet(
                 graphGenerator = graphGenerator,
                 selectedGraph = selectedGraph,
@@ -339,7 +239,7 @@ fun HomeScreen(paddingValues: PaddingValues) {
             )
         }
 
-        if (showEditModeSheet && computeMode == SpectralComputeMode.Graph) {
+        if (showEditModeSheet) {
             EditModeBottomSheet(
                 selectedEditMode = selectedEditMode,
                 onEditModeSelected = { mode ->

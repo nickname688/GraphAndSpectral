@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +28,8 @@ internal fun HypergraphControlPanel(
     autoCompute: Boolean,
     onAutoComputeChange: (Boolean) -> Unit,
     onRunCompute: () -> Unit,
+    selectedHypergraph: String,
+    onOpenPresetSheet: () -> Unit,
     onClearHypergraph: () -> Unit
 ) {
     Card(
@@ -42,7 +45,7 @@ internal fun HypergraphControlPanel(
                 label = "超边:",
                 value = hyperedgeCommand,
                 onValueChange = onHyperedgeCommandChange,
-                placeholder = "(1,2,3); (1,3,4)",
+                placeholder = "K5^3; S6^3; (1,2,3)",
                 actionText = "加入",
                 onAction = onAddHyperedges
             )
@@ -64,8 +67,16 @@ internal fun HypergraphControlPanel(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                Text(text = "预设超图:", style = MaterialTheme.typography.bodyLarge)
+                OutlinedButton(
+                    onClick = onOpenPresetSheet,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(selectedHypergraph)
+                }
                 Button(onClick = onClearHypergraph) {
                     Text("清空")
                 }

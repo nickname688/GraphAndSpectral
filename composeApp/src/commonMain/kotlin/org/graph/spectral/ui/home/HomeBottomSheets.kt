@@ -2,6 +2,7 @@ package org.graph.spectral.ui.home
 
 import androidx.compose.runtime.Composable
 import org.graph.spectral.models.GraphGenerator
+import org.graph.spectral.models.hypergraph.HypergraphGenerator
 import org.graph.spectral.toolUI.CategoryOption
 import org.graph.spectral.toolUI.CustomBottomSheet
 
@@ -19,6 +20,27 @@ internal fun PresetGraphBottomSheet(
                 id = preset.id,
                 name = preset.name,
                 isSelected = selectedGraph == preset.name
+            )
+        },
+        onCategoryClick = onPresetSelected,
+        onDismiss = onDismiss
+    )
+}
+
+@Composable
+internal fun PresetHypergraphBottomSheet(
+    hypergraphGenerator: HypergraphGenerator,
+    selectedHypergraph: String,
+    onPresetSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    CustomBottomSheet(
+        title = "选择经典预设超图",
+        categories = hypergraphGenerator.presetHypergraphs.map { preset ->
+            CategoryOption(
+                id = preset.id,
+                name = preset.name,
+                isSelected = selectedHypergraph == preset.name
             )
         },
         onCategoryClick = onPresetSelected,

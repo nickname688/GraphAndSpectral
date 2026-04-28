@@ -3,6 +3,7 @@ package org.graph.spectral
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import org.graph.spectral.models.EigenCalculator
 import org.graph.spectral.models.graphcore.GraphCore
 import org.graph.spectral.models.graphcore.adjacencyMatrix
+import org.graph.spectral.ui.home.HypergraphScreen
 import org.graph.spectral.ui.home.HomeScreen
 import org.graph.spectral.ui.SettingsScreen
 
@@ -27,8 +29,9 @@ fun App() {
             topBar = {
                 // 根据当前路由动态显示标题
                 val title = when(navController.value) {
-                    0 -> "谱半径计算器"
-                    1 -> "设置"
+                    0 -> "图谱半径计算器"
+                    1 -> "超图谱半径计算器"
+                    2 -> "设置"
                     else -> ""
                 }
                 MyTopAppBar(title)
@@ -36,16 +39,22 @@ fun App() {
             bottomBar = {
                 BottomAppBar {
                     NavigationBarItem(
-                        icon = { Icon(Icons.Filled.Home, contentDescription = "主页") },
-                        label = { Text("主页") },
+                        icon = { Icon(Icons.Filled.Home, contentDescription = "图") },
+                        label = { Text("图") },
                         selected = navController.value == 0,
                         onClick = { navController.value = 0 }
                     )
                     NavigationBarItem(
-                        icon = { Icon(Icons.Filled.Settings, contentDescription = "设置") },
-                        label = { Text("设置") },
+                        icon = { Icon(Icons.Filled.Share, contentDescription = "超图") },
+                        label = { Text("超图") },
                         selected = navController.value == 1,
                         onClick = { navController.value = 1 }
+                    )
+                    NavigationBarItem(
+                        icon = { Icon(Icons.Filled.Settings, contentDescription = "设置") },
+                        label = { Text("设置") },
+                        selected = navController.value == 2,
+                        onClick = { navController.value = 2 }
                     )
                 }
             }
@@ -53,7 +62,8 @@ fun App() {
 
             when (navController.value) {
                 0 -> HomeScreen(paddingValues)
-                1 -> SettingsScreen(paddingValues)
+                1 -> HypergraphScreen(paddingValues)
+                2 -> SettingsScreen(paddingValues)
             }
         }
     }

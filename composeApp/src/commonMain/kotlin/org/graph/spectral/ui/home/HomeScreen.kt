@@ -152,102 +152,104 @@ fun HomeScreen(paddingValues: PaddingValues) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-    ) {
-        LazyColumn(
+    CustomKeyboardHost {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            item {
-                HomeControlPanel(
-                    command = command,
-                    onCommandChange = { command = it },
-                    onSubmitCommand = {
-                        val resultGraph = graphGenerator.getGraphByCommand(graph, command.trim())
-                        if (resultGraph != null) {
-                            selectedGraph = "自定义"
-                            updateGraph(resultGraph)
-                        } else {
-                            showError("输入有误")
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    HomeControlPanel(
+                        command = command,
+                        onCommandChange = { command = it },
+                        onSubmitCommand = {
+                            val resultGraph = graphGenerator.getGraphByCommand(graph, command.trim())
+                            if (resultGraph != null) {
+                                selectedGraph = "自定义"
+                                updateGraph(resultGraph)
+                            } else {
+                                showError("输入有误")
+                            }
+                        },
+                        selectedEditMode = selectedEditMode,
+                        node1 = node1,
+                        onNode1Change = { node1 = it },
+                        node2 = node2,
+                        onNode2Change = { node2 = it },
+                        delNode1 = delNode1,
+                        onDelNode1Change = { delNode1 = it },
+                        delNode2 = delNode2,
+                        onDelNode2Change = { delNode2 = it },
+                        delNode = delNode,
+                        onDelNodeChange = { delNode = it },
+                        onOpenEditModeSheet = { showEditModeSheet = true },
+                        onSubmitEditOperation = { submitEditOperation() },
+                        autoCompute = autoCompute,
+                        onAutoComputeChange = { autoCompute = it },
+                        onRunCompute = { runCompute() },
+                        selectedGraph = selectedGraph,
+                        onOpenPresetSheet = { showPresetSheet = true },
+                        onClearGraph = {
+                            graph = GraphCore()
+                            selectedGraph = "选择预设图"
+                            result = ""
+                            matrixResult = ""
                         }
-                    },
-                    selectedEditMode = selectedEditMode,
-                    node1 = node1,
-                    onNode1Change = { node1 = it },
-                    node2 = node2,
-                    onNode2Change = { node2 = it },
-                    delNode1 = delNode1,
-                    onDelNode1Change = { delNode1 = it },
-                    delNode2 = delNode2,
-                    onDelNode2Change = { delNode2 = it },
-                    delNode = delNode,
-                    onDelNodeChange = { delNode = it },
-                    onOpenEditModeSheet = { showEditModeSheet = true },
-                    onSubmitEditOperation = { submitEditOperation() },
-                    autoCompute = autoCompute,
-                    onAutoComputeChange = { autoCompute = it },
-                    onRunCompute = { runCompute() },
-                    selectedGraph = selectedGraph,
-                    onOpenPresetSheet = { showPresetSheet = true },
-                    onClearGraph = {
-                        graph = GraphCore()
-                        selectedGraph = "选择预设图"
-                        result = ""
-                        matrixResult = ""
+                    )
+                }
+
+                item {
+                    GraphVisualizerSection(
+                        graph = graph,
+                        showGraphVisualizer = showGraphVisualizer,
+                        onShowGraphVisualizer = { showGraphVisualizer = true },
+                        onHideGraphVisualizer = { showGraphVisualizer = false }
+                    )
+                }
+
+                if (result.isNotEmpty()) {
+                    item {
+                        ResultTextCard(title = "计算结果", text = result)
                     }
-                )
-            }
+                }
 
-            item {
-                GraphVisualizerSection(
-                    graph = graph,
-                    showGraphVisualizer = showGraphVisualizer,
-                    onShowGraphVisualizer = { showGraphVisualizer = true },
-                    onHideGraphVisualizer = { showGraphVisualizer = false }
-                )
-            }
-
-            if (result.isNotEmpty()) {
-                item {
-                    ResultTextCard(title = "计算结果", text = result)
+                if (matrixResult.isNotEmpty()) {
+                    item {
+                        ResultTextCard(title = "邻接矩阵", text = matrixResult)
+                    }
                 }
             }
 
-            if (matrixResult.isNotEmpty()) {
-                item {
-                    ResultTextCard(title = "邻接矩阵", text = matrixResult)
-                }
+            if (showPresetSheet) {
+                PresetGraphBottomSheet(
+                    graphGenerator = graphGenerator,
+                    selectedGraph = selectedGraph,
+                    onPresetSelected = { presetId ->
+                        selectedGraph = graphGenerator.getPresetDisplayName(presetId)
+                        showPresetSheet = false
+                        updateGraph(graphGenerator.getGraph(presetId))
+                    },
+                    onDismiss = { showPresetSheet = false }
+                )
             }
-        }
 
-        if (showPresetSheet) {
-            PresetGraphBottomSheet(
-                graphGenerator = graphGenerator,
-                selectedGraph = selectedGraph,
-                onPresetSelected = { presetId ->
-                    selectedGraph = graphGenerator.getPresetDisplayName(presetId)
-                    showPresetSheet = false
-                    updateGraph(graphGenerator.getGraph(presetId))
-                },
-                onDismiss = { showPresetSheet = false }
-            )
-        }
-
-        if (showEditModeSheet) {
-            EditModeBottomSheet(
-                selectedEditMode = selectedEditMode,
-                onEditModeSelected = { mode ->
-                    selectEditMode(mode)
-                    showEditModeSheet = false
-                },
-                onDismiss = { showEditModeSheet = false }
-            )
+            if (showEditModeSheet) {
+                EditModeBottomSheet(
+                    selectedEditMode = selectedEditMode,
+                    onEditModeSelected = { mode ->
+                        selectEditMode(mode)
+                        showEditModeSheet = false
+                    },
+                    onDismiss = { showEditModeSheet = false }
+                )
+            }
         }
     }
 }

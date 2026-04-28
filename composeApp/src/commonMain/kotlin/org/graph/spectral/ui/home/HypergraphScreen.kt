@@ -91,59 +91,61 @@ fun HypergraphScreen(paddingValues: PaddingValues) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-    ) {
-        LazyColumn(
+    CustomKeyboardHost {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            item {
-                HypergraphControlPanel(
-                    hyperedgeCommand = hyperedgeCommand,
-                    onHyperedgeCommandChange = { hyperedgeCommand = it },
-                    onAddHyperedges = { submitHyperedgeCommand() },
-                    deleteHyperedgeCommand = deleteHyperedgeCommand,
-                    onDeleteHyperedgeCommandChange = { deleteHyperedgeCommand = it },
-                    onDeleteHyperedges = { submitDeleteHyperedgeCommand() },
-                    autoCompute = autoCompute,
-                    onAutoComputeChange = { autoCompute = it },
-                    onRunCompute = { runHypergraphCompute() },
-                    selectedHypergraph = selectedHypergraph,
-                    onOpenPresetSheet = { showPresetSheet = true },
-                    onClearHypergraph = {
-                        hypergraph = HypergraphCore()
-                        hyperedgeCommand = ""
-                        deleteHyperedgeCommand = ""
-                        selectedHypergraph = "选择预设超图"
-                        result = ""
-                    }
-                )
-            }
-
-            if (result.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 item {
-                    ResultTextCard(title = "计算结果", text = result)
+                    HypergraphControlPanel(
+                        hyperedgeCommand = hyperedgeCommand,
+                        onHyperedgeCommandChange = { hyperedgeCommand = it },
+                        onAddHyperedges = { submitHyperedgeCommand() },
+                        deleteHyperedgeCommand = deleteHyperedgeCommand,
+                        onDeleteHyperedgeCommandChange = { deleteHyperedgeCommand = it },
+                        onDeleteHyperedges = { submitDeleteHyperedgeCommand() },
+                        autoCompute = autoCompute,
+                        onAutoComputeChange = { autoCompute = it },
+                        onRunCompute = { runHypergraphCompute() },
+                        selectedHypergraph = selectedHypergraph,
+                        onOpenPresetSheet = { showPresetSheet = true },
+                        onClearHypergraph = {
+                            hypergraph = HypergraphCore()
+                            hyperedgeCommand = ""
+                            deleteHyperedgeCommand = ""
+                            selectedHypergraph = "选择预设超图"
+                            result = ""
+                        }
+                    )
+                }
+
+                if (result.isNotEmpty()) {
+                    item {
+                        ResultTextCard(title = "计算结果", text = result)
+                    }
                 }
             }
-        }
 
-        if (showPresetSheet) {
-            PresetHypergraphBottomSheet(
-                hypergraphGenerator = hypergraphGenerator,
-                selectedHypergraph = selectedHypergraph,
-                onPresetSelected = { presetId ->
-                    selectedHypergraph = hypergraphGenerator.getPresetDisplayName(presetId)
-                    showPresetSheet = false
-                    updateHypergraph(hypergraphGenerator.getHypergraph(presetId))
-                },
-                onDismiss = { showPresetSheet = false }
-            )
+            if (showPresetSheet) {
+                PresetHypergraphBottomSheet(
+                    hypergraphGenerator = hypergraphGenerator,
+                    selectedHypergraph = selectedHypergraph,
+                    onPresetSelected = { presetId ->
+                        selectedHypergraph = hypergraphGenerator.getPresetDisplayName(presetId)
+                        showPresetSheet = false
+                        updateHypergraph(hypergraphGenerator.getHypergraph(presetId))
+                    },
+                    onDismiss = { showPresetSheet = false }
+                )
+            }
         }
     }
 }

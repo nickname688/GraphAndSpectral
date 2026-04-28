@@ -1,4 +1,4 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.graph
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -60,27 +60,6 @@ internal fun GraphVisualizerSection(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("显示图可视化")
-        }
-    }
-}
-
-@Composable
-internal fun ResultTextCard(
-    title: String,
-    text: String
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text)
         }
     }
 }

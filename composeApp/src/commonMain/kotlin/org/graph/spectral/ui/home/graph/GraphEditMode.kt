@@ -1,6 +1,6 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.graph
 
-internal enum class GraphEditMode(
+enum class GraphEditMode(
     val id: String,
     val label: String,
     val compactLabel: String

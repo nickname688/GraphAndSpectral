@@ -1,4 +1,10 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.graph
+
+import org.graph.spectral.ui.home.common.AutoComputeRow
+import org.graph.spectral.ui.home.common.EditModeBottomSheet
+import org.graph.spectral.ui.home.common.PresetGraphBottomSheet
+import org.graph.spectral.ui.home.common.ResultTextCard
+import org.graph.spectral.ui.toolUI.CustomKeyboardHost
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

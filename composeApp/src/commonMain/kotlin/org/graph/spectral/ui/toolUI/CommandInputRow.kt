@@ -1,9 +1,9 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.toolUI
 
 import androidx.compose.runtime.Composable
 
 @Composable
-internal fun CommandInputRow(
+fun CommandInputRow(
     command: String,
     onCommandChange: (String) -> Unit,
     onSubmitCommand: () -> Unit

@@ -1,4 +1,7 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.graph
+
+import org.graph.spectral.ui.home.common.AutoComputeRow
+import org.graph.spectral.ui.toolUI.CommandInputRow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

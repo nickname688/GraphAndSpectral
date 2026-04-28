@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.sp
 import org.graph.spectral.models.EigenCalculator
 import org.graph.spectral.models.graphcore.GraphCore
 import org.graph.spectral.models.graphcore.adjacencyMatrix
-import org.graph.spectral.ui.home.HypergraphScreen
-import org.graph.spectral.ui.home.HomeScreen
+import org.graph.spectral.ui.home.graph.HomeScreen
+import org.graph.spectral.ui.home.hypergraph.HypergraphScreen
 import org.graph.spectral.ui.SettingsScreen
 
 @Composable

@@ -1,4 +1,4 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.graph
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

@@ -1,4 +1,4 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.toolUI
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.graph.spectral.toolUI.CustomTextField
 
-internal class CustomKeyboardHostState {
+class CustomKeyboardHostState {
     var openInputId by mutableStateOf<String?>(null)
         private set
 
@@ -66,7 +66,7 @@ internal class CustomKeyboardHostState {
     }
 }
 
-internal data class CustomKeyboardHandler(
+data class CustomKeyboardHandler(
     val insert: (String) -> Unit,
     val backspace: () -> Unit,
     val clear: () -> Unit
@@ -77,7 +77,7 @@ private val LocalCustomKeyboardHostState = staticCompositionLocalOf<CustomKeyboa
 }
 
 @Composable
-internal fun CustomKeyboardHost(content: @Composable () -> Unit) {
+fun CustomKeyboardHost(content: @Composable () -> Unit) {
     val hostState = remember { CustomKeyboardHostState() }
     CompositionLocalProvider(
         LocalCustomKeyboardHostState provides hostState,
@@ -86,7 +86,7 @@ internal fun CustomKeyboardHost(content: @Composable () -> Unit) {
 }
 
 @Composable
-internal fun CommandKeyboardInput(
+fun CommandKeyboardInput(
     inputId: String,
     label: String,
     value: String,
@@ -136,7 +136,7 @@ internal fun CommandKeyboardInput(
 }
 
 @Composable
-internal fun CustomKeyboardTextField(
+fun CustomKeyboardTextField(
     inputId: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -212,7 +212,7 @@ internal fun CustomKeyboardTextField(
 }
 
 @Composable
-internal fun CustomKeyboardPanel(
+fun CustomKeyboardPanel(
     inputIds: Set<String>,
     modifier: Modifier = Modifier
 ) {

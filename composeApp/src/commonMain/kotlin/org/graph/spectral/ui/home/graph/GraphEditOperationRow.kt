@@ -1,4 +1,7 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.graph
+
+import org.graph.spectral.ui.toolUI.CustomKeyboardPanel
+import org.graph.spectral.ui.toolUI.CustomKeyboardTextField
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues

@@ -1,4 +1,4 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-internal fun AutoComputeRow(
+fun AutoComputeRow(
     autoCompute: Boolean,
     onAutoComputeChange: (Boolean) -> Unit,
     onRunCompute: () -> Unit

@@ -1,4 +1,6 @@
-package org.graph.spectral.ui.home
+package org.graph.spectral.ui.home.common
+
+import org.graph.spectral.ui.home.graph.GraphEditMode
 
 import androidx.compose.runtime.Composable
 import org.graph.spectral.models.GraphGenerator
@@ -7,7 +9,7 @@ import org.graph.spectral.toolUI.CategoryOption
 import org.graph.spectral.toolUI.CustomBottomSheet
 
 @Composable
-internal fun PresetGraphBottomSheet(
+fun PresetGraphBottomSheet(
     graphGenerator: GraphGenerator,
     selectedGraph: String,
     onPresetSelected: (String) -> Unit,
@@ -28,7 +30,7 @@ internal fun PresetGraphBottomSheet(
 }
 
 @Composable
-internal fun PresetHypergraphBottomSheet(
+fun PresetHypergraphBottomSheet(
     hypergraphGenerator: HypergraphGenerator,
     selectedHypergraph: String,
     onPresetSelected: (String) -> Unit,
@@ -49,7 +51,7 @@ internal fun PresetHypergraphBottomSheet(
 }
 
 @Composable
-internal fun EditModeBottomSheet(
+fun EditModeBottomSheet(
     selectedEditMode: GraphEditMode,
     onEditModeSelected: (GraphEditMode) -> Unit,
     onDismiss: () -> Unit

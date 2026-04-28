@@ -1,7 +1,6 @@
 package org.graph.spectral.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,8 +15,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -35,6 +32,8 @@ import org.graph.spectral.computeResult
 import org.graph.spectral.models.EigenCalculator
 import org.graph.spectral.models.GraphGenerator
 import org.graph.spectral.models.graphcore.GraphCore
+import org.graph.spectral.toolUI.CategoryOption
+import org.graph.spectral.toolUI.CustomBottomSheet
 import org.graph.spectral.toolUI.CustomTextField
 
 @Composable
@@ -52,6 +51,7 @@ fun HomeScreen(paddingValues: PaddingValues) {
     var autoCompute by remember { mutableStateOf(true) }
     var showMoreOperations by remember { mutableStateOf(false) }
     var showGraphVisualizer by remember { mutableStateOf(false) }
+    var showPresetSheet by remember { mutableStateOf(false) }
 
     val graphGenerator = GraphGenerator()
     val eigenCalculator = EigenCalculator()
@@ -295,41 +295,11 @@ fun HomeScreen(paddingValues: PaddingValues) {
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(text = "预设图:", style = MaterialTheme.typography.bodyLarge)
-                            var expanded by remember { mutableStateOf(false) }
-                            Box(
+                            OutlinedButton(
+                                onClick = { showPresetSheet = true },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                OutlinedButton(
-                                    onClick = { expanded = true },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(selectedGraph)
-                                }
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false }
-                                ) {
-                                    listOf(
-                                        "选择预设图",
-                                        "自定义",
-                                        "C3/K3",
-                                        "C4",
-                                        "K4",
-                                        "C5",
-                                        "M5"
-                                    ).forEach { option ->
-                                        DropdownMenuItem(
-                                            text = { Text(option) },
-                                            onClick = {
-                                                selectedGraph = option
-                                                expanded = false
-                                                if (option != "选择预设图" && option != "自定义") {
-                                                    updateGraph(graphGenerator.getGraph(option))
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
+                                Text(selectedGraph)
                             }
                             Button(onClick = {
                                 graph = GraphCore()
@@ -424,6 +394,25 @@ fun HomeScreen(paddingValues: PaddingValues) {
                     }
                 }
             }
+        }
+
+        if (showPresetSheet) {
+            CustomBottomSheet(
+                title = "选择经典预设图",
+                categories = graphGenerator.presetGraphs.map { preset ->
+                    CategoryOption(
+                        id = preset.id,
+                        name = preset.name,
+                        isSelected = selectedGraph == preset.name
+                    )
+                },
+                onCategoryClick = { presetId ->
+                    selectedGraph = graphGenerator.getPresetDisplayName(presetId)
+                    showPresetSheet = false
+                    updateGraph(graphGenerator.getGraph(presetId))
+                },
+                onDismiss = { showPresetSheet = false }
+            )
         }
     }
 }

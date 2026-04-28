@@ -2,16 +2,44 @@ package org.graph.spectral.models
 
 import org.graph.spectral.models.graphcore.GraphCore
 
+data class PresetGraphOption(
+    val id: String,
+    val name: String
+)
+
 class GraphGenerator {
+    val presetGraphs: List<PresetGraphOption> = listOf(
+        PresetGraphOption("P4", "路径图 P4"),
+        PresetGraphOption("C3/K3", "三角形 C3 / 完全图 K3"),
+        PresetGraphOption("C4", "正方形 C4"),
+        PresetGraphOption("C5", "五边形 C5"),
+        PresetGraphOption("K4", "完全图 K4"),
+        PresetGraphOption("K5", "完全图 K5"),
+        PresetGraphOption("S5", "星图 S5"),
+        PresetGraphOption("W5", "轮图 W5")
+    )
+
     fun getGraph(name: String): GraphCore {
-        return when (name) {
+        return when (name.toPresetId()) {
+            "P4" -> getPathGraph(4)
             "C3/K3" -> getC3()
             "C4" -> getC4()
             "K4" -> getK4()
+            "K5" -> getCompleteGraph(5)
             "C5" -> getC5()
-            "M5" -> getM5()
+            "S5" -> getStarGraph(5)
+            "W5", "M5" -> getWheelGraph5()
             else -> GraphCore()
         }
+    }
+
+    fun getPresetDisplayName(id: String): String {
+        return presetGraphs.firstOrNull { it.id == id }?.name ?: "选择预设图"
+    }
+
+    private fun String.toPresetId(): String {
+        val trimmed = trim()
+        return presetGraphs.firstOrNull { it.name == trimmed }?.id ?: trimmed
     }
 
     private fun getC3(): GraphCore {
@@ -32,11 +60,23 @@ class GraphGenerator {
     }
 
     private fun getK4(): GraphCore {
+        return getCompleteGraph(4)
+    }
+
+    private fun getCompleteGraph(order: Int): GraphCore {
         return GraphCore().also { graph ->
-            for (i in 1..4) {
-                for (j in i + 1..4) {
+            for (i in 1..order) {
+                for (j in i + 1..order) {
                     graph.addEdge(i.toString(), j.toString())
                 }
+            }
+        }
+    }
+
+    private fun getPathGraph(order: Int): GraphCore {
+        return GraphCore().also { graph ->
+            for (i in 1 until order) {
+                graph.addEdge(i.toString(), (i + 1).toString())
             }
         }
     }
@@ -51,7 +91,15 @@ class GraphGenerator {
         }
     }
 
-    private fun getM5(): GraphCore {
+    private fun getStarGraph(order: Int): GraphCore {
+        return GraphCore().also { graph ->
+            for (i in 2..order) {
+                graph.addEdge("1", i.toString())
+            }
+        }
+    }
+
+    private fun getWheelGraph5(): GraphCore {
         return getC4().also { graph ->
             for (i in 1..4) {
                 graph.addEdge("5", i.toString())

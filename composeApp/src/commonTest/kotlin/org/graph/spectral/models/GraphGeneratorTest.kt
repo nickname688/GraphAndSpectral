@@ -13,11 +13,24 @@ class GraphGeneratorTest {
 
     @Test
     fun presetsMatchExpectedGraphs() {
+        assertGraph("P4", order = 4, size = 3)
         assertGraph("C3/K3", order = 3, size = 3)
         assertGraph("C4", order = 4, size = 4)
         assertGraph("K4", order = 4, size = 6)
+        assertGraph("K5", order = 5, size = 10)
         assertGraph("C5", order = 5, size = 5)
+        assertGraph("S5", order = 5, size = 4)
+        assertGraph("W5", order = 5, size = 8)
         assertGraph("M5", order = 5, size = 8)
+    }
+
+    @Test
+    fun presetDisplayNamesCanBuildGraphs() {
+        val graph = generator.getGraph("轮图 W5")
+
+        assertEquals(5, graph.order())
+        assertEquals(8, graph.size())
+        assertEquals("轮图 W5", generator.getPresetDisplayName("W5"))
     }
 
     @Test
